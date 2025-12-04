@@ -31,7 +31,27 @@ fi
 # Install dependencies
 echo -e "${YELLOW}[*] Installing dependencies...${NC}"
 apt-get update -qq
-apt-get install -y git golang-go screen iptables iptables-persistent > /dev/null 2>&1
+apt-get install -y git screen iptables iptables-persistent > /dev/null 2>&1
+
+# Check if snap is installed, if not install snapd
+if ! command -v snap > /dev/null 2>&1; then
+    echo -e "${YELLOW}[*] Snap not found, installing snapd...${NC}"
+    apt-get install -y snapd > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to install snapd${NC}"
+        exit 1
+    fi
+    # Wait for snapd to initialize
+    sleep 5
+fi
+
+# Install golang using snap
+echo -e "${YELLOW}[*] Installing golang using snap...${NC}"
+snap install go --classic > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to install golang via snap${NC}"
+    exit 1
+fi
 
 # Create directories
 echo -e "${YELLOW}[*] Creating installation directories...${NC}"
