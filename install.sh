@@ -35,8 +35,8 @@ apt-get install -y git screen iptables iptables-persistent wget > /dev/null 2>&1
 
 # Install golang using direct download
 echo -e "${YELLOW}[*] Installing golang...${NC}"
-GO_V="1.22.4"
-wget -q https://go.dev/dl/go${GO_V}.linux-amd64.tar.gz
+GO_V="1.25.5"
+wget -q https://dl.google.com/go/go${GO_V}.linux-amd64.tar.gz
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to download golang${NC}"
     exit 1
@@ -58,8 +58,8 @@ echo -e "${GREEN}Go ${GO_V} Installed.${NC}"
 echo -e "${YELLOW}Note: Restart your terminal or run 'source ~/.profile' to apply changes.${NC}"
 
 # Verify installation
-if command -v go > /dev/null 2>&1; then
-    GO_VERSION=$(go version)
+if command -v /usr/local/go/bin/go > /dev/null 2>&1; then
+    GO_VERSION=$(/usr/local/go/bin/go version)
     echo -e "${GREEN}✓ ${GO_VERSION}${NC}"
 else
     echo -e "${RED}Error: Go installation verification failed${NC}"
@@ -85,7 +85,7 @@ fi
 # Build dnstt-server
 echo -e "${YELLOW}[*] Building dnstt-server...${NC}"
 cd "$INSTALL_DIR/dnstt/dnstt-server"
-go build > /dev/null 2>&1
+/usr/local/go/bin/go build > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to build dnstt-server${NC}"
     exit 1
