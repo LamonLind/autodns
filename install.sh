@@ -92,8 +92,15 @@ EOF
 
 # Set up iptables rules
 echo -e "${YELLOW}[*] Setting up iptables rules...${NC}"
+
+# Detect primary network interface
+PRIMARY_IFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
+if [ -z "$PRIMARY_IFACE" ]; then
+    PRIMARY_IFACE="eth0"  # Fallback to eth0 if detection fails
+fi
+
 iptables -I INPUT -p udp --dport 5300 -j ACCEPT
-iptables -t nat -I PREROUTING -i eth0 -p udp --dport 53 -j REDIRECT --to-ports 5300
+iptables -t nat -I PREROUTING -i "$PRIMARY_IFACE" -p udp --dport 53 -j REDIRECT --to-ports 5300
 
 # Save iptables rules to persist on reboot
 echo -e "${YELLOW}[*] Saving iptables rules for persistence...${NC}"
@@ -102,6 +109,15 @@ if command -v netfilter-persistent > /dev/null; then
 elif command -v iptables-save > /dev/null; then
     mkdir -p /etc/iptables
     iptables-save > /etc/iptables/rules.v4 2>/dev/null || true
+    # Ensure rules are restored on boot
+    if [ ! -f /etc/network/if-pre-up.d/iptables ]; then
+        mkdir -p /etc/network/if-pre-up.d
+        cat > /etc/network/if-pre-up.d/iptables <<'IPTABLESEOF'
+#!/bin/sh
+/sbin/iptables-restore < /etc/iptables/rules.v4
+IPTABLESEOF
+        chmod +x /etc/network/if-pre-up.d/iptables
+    fi
 fi
 
 # Create systemd service for auto-start on reboot
@@ -115,11 +131,11 @@ After=network.target
 Type=forking
 User=root
 WorkingDirectory=$INSTALL_DIR/dnstt/dnstt-server
-ExecStart=/usr/bin/screen -dmS slowdns $INSTALL_DIR/dnstt/dnstt-server/dnstt-server -udp :5300 -privkey-file $INSTALL_DIR/server.key \$NAMESERVER 127.0.0.1:\$PORT
+EnvironmentFile=$CONFIG_FILE
+ExecStart=/usr/bin/screen -dmS slowdns $INSTALL_DIR/dnstt/dnstt-server/dnstt-server -udp :5300 -privkey-file $INSTALL_DIR/server.key \${NAMESERVER} 127.0.0.1:\${PORT}
 ExecStop=/usr/bin/screen -S slowdns -X quit
 Restart=on-failure
 RestartSec=5
-EnvironmentFile=$CONFIG_FILE
 
 [Install]
 WantedBy=multi-user.target

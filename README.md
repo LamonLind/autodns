@@ -2,6 +2,20 @@
 
 An automated installation and management system for DNSTT (DNS Tunnel) server.
 
+## Quick Install (One-Click)
+
+```bash
+wget https://raw.githubusercontent.com/LamonLind/autodns/main/install.sh && sudo bash install.sh
+```
+
+Or using curl:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/LamonLind/autodns/main/install.sh | sudo bash
+```
+
+> **Note:** During installation, you will be prompted to enter your nameserver (e.g., `ns.example.com`).
+
 ## Features
 
 - 🚀 One-command installation
@@ -14,9 +28,17 @@ An automated installation and management system for DNSTT (DNS Tunnel) server.
 
 ## Installation
 
-Run the installation script as root:
+### Method 1: One-Click Install (Recommended)
+
+Use the one-click install command shown above.
+
+### Method 2: Manual Installation
+
+Clone the repository and run the installation script:
 
 ```bash
+git clone https://github.com/LamonLind/autodns.git
+cd autodns
 sudo ./install.sh
 ```
 
