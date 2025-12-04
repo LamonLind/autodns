@@ -128,12 +128,12 @@ Description=DNSTT DNS Tunnel Server
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=root
 WorkingDirectory=$INSTALL_DIR/dnstt/dnstt-server
 EnvironmentFile=$CONFIG_FILE
-ExecStart=/usr/bin/screen -dmS slowdns $INSTALL_DIR/dnstt/dnstt-server/dnstt-server -udp :5300 -privkey-file $INSTALL_DIR/server.key \${NAMESERVER} 127.0.0.1:\${PORT}
-ExecStop=/usr/bin/screen -S slowdns -X quit
+ExecStart=/usr/bin/screen -DmS dnstt $INSTALL_DIR/dnstt/dnstt-server/dnstt-server -udp :5300 -privkey-file $INSTALL_DIR/server.key \${NAMESERVER} 127.0.0.1:\${PORT}
+ExecStop=/usr/bin/screen -S dnstt -X quit
 Restart=on-failure
 RestartSec=5
 

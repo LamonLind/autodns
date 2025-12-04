@@ -104,7 +104,8 @@ Configuration is stored in `/etc/dnstt/config`:
 iptables -I INPUT -p udp --dport 5300 -j ACCEPT
 
 # Redirect DNS traffic (port 53) to DNSTT (port 5300)
-iptables -t nat -I PREROUTING -i eth0 -p udp --dport 53 -j REDIRECT --to-ports 5300
+# The primary network interface is auto-detected during installation
+iptables -t nat -I PREROUTING -i <interface> -p udp --dport 53 -j REDIRECT --to-ports 5300
 ```
 
 Rules are automatically saved and restored on reboot using `iptables-persistent`.
