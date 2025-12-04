@@ -31,25 +31,38 @@ fi
 # Install dependencies
 echo -e "${YELLOW}[*] Installing dependencies...${NC}"
 apt-get update -qq
-apt-get install -y git screen iptables iptables-persistent > /dev/null 2>&1
+apt-get install -y git screen iptables iptables-persistent wget > /dev/null 2>&1
 
-# Check if snap is installed, if not install snapd
-if ! command -v snap > /dev/null 2>&1; then
-    echo -e "${YELLOW}[*] Snap not found, installing snapd...${NC}"
-    apt-get install -y snapd > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: Failed to install snapd${NC}"
-        exit 1
-    fi
-    # Wait for snapd to initialize
-    sleep 5
+# Install golang using direct download
+echo -e "${YELLOW}[*] Installing golang...${NC}"
+GO_V="1.22.4"
+wget -q https://go.dev/dl/go${GO_V}.linux-amd64.tar.gz
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to download golang${NC}"
+    exit 1
 fi
 
-# Install golang using snap
-echo -e "${YELLOW}[*] Installing golang using snap...${NC}"
-snap install go --classic > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Failed to install golang via snap${NC}"
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go${GO_V}.linux-amd64.tar.gz
+rm go${GO_V}.linux-amd64.tar.gz
+
+# Add Go to PATH in ~/.profile if not already present
+if ! grep -q "/usr/local/go/bin" ~/.profile 2>/dev/null; then
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile
+fi
+
+# Export PATH for current session
+export PATH=$PATH:/usr/local/go/bin
+
+echo -e "${GREEN}Go ${GO_V} Installed.${NC}"
+echo -e "${YELLOW}Note: Restart your terminal or run 'source ~/.profile' to apply changes.${NC}"
+
+# Verify installation
+if command -v go > /dev/null 2>&1; then
+    GO_VERSION=$(go version)
+    echo -e "${GREEN}✓ ${GO_VERSION}${NC}"
+else
+    echo -e "${RED}Error: Go installation verification failed${NC}"
     exit 1
 fi
 
